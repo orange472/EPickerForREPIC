@@ -51,6 +51,9 @@ def pick(opt):
   if opt.data_type == 'mrc':
     mrc_thi = []
     for (image_name) in image_names:
+      if not os.path.isfile(image_name):
+        continue
+      
       with open(image_name, "rb") as f:
           content = f.read()
       data, header, _ = parse(content=content)

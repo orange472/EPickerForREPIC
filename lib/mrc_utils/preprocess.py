@@ -167,6 +167,10 @@ def get_data(opt, data_subset: str):
     print('Invalid data: opt.data should be a directory or thi file')
     return [[], []]
 
+  if(not os.path.isdir(label_path)):
+    print(label_path + " is not a directory or file")
+    return [[], []]
+
   # Get data
   if isdir:
     label_files = [ l.rstrip('.'+opt.label_type) for l in os.listdir(label_path) if l.endswith(opt.label_type)]
@@ -174,11 +178,7 @@ def get_data(opt, data_subset: str):
     intersection = list(set(mrc_files).intersection(set(label_files)))
     union = list(set(mrc_files) | set(label_files))
     difference = list(set(union).difference(intersection))
-    #mrc_files = [ m+'.mrc' for m in intersection ]
-    #label_files = [ l+'.'+opt.label_type for l in intersection ]
-    #print('data files:', mrc_files)
-    #print('label_files:', label_files)
-    #print('intersection:', intersection)
+
     for d in difference:
       if d in mrc_files:
         print('Warning: No matching label file for %s.mrc' % (d))
@@ -285,8 +285,6 @@ def process(opt):
         [testing_data, testing_labels] = get_data(opt, "testing")
         [validation_data, validation_labels] = get_data(opt, "validation") 
 
-        print("len(training_data)=", len(training_data), "len(testing_data)=", len(testing_data), "len(validation_data)=", len(validation_data))
-
         if len(training_data) > 0:
           train = label_downsample(
             training_data, training_labels, 
@@ -317,155 +315,6 @@ def process(opt):
         else:
           val = []
 
-        # mrc_files = []
-        # mrc_data = []
-        # if isdir:
-        #     for file in os.listdir(path):
-        #         if file.endswith('.mrc'):
-        #             #print("Loading %s ..." % (file))
-        #             #data = load_and_downsample(os.path.join(path, file), opt.target_size)
-        #             mrc_files.append(file)
-        # elif opt.data.endswith('.thi'):
-        #     with open(opt.data) as f:
-        #         while (True):
-        #             line = f.readline()
-        #             if not line:
-        #                 break
-        #             if line.startswith('['):
-        #                 continue
-        #             file = line.rstrip('\n')
-        #             file = file.rstrip(' ')
-        #             file = file.lstrip(' ')
-        #             print('Loading %s ...' % (file))
-        #             #data = load_and_downsample(file, opt.target_size)
-        #             #mrc_data.append(data)
-        #             mrc_files.append(file)
-        # else:
-        #     print('Invalid data: opt.data should be a directory or thi file')
-        #     return
-        # #mrc_data.sort(key=lambda m: m.name)
-        # # load label
-
-        # label = []
-        # if isdir:
-        #   label_path = opt.label if opt.label else opt.data
-        #   label_files = [ l.rstrip('.'+opt.label_type) for l in os.listdir(label_path) if l.endswith(opt.label_type)]
-        #   mrc_files = [ m.rstrip('.mrc') for m in mrc_files ]
-        #   intersection = list(set(mrc_files).intersection(set(label_files)))
-        #   union = list(set(mrc_files) | set(label_files))
-        #   difference = list(set(union).difference(intersection))
-        #   #mrc_files = [ m+'.mrc' for m in intersection ]
-        #   #label_files = [ l+'.'+opt.label_type for l in intersection ]
-        #   #print('data files:', mrc_files)
-        #   #print('label_files:', label_files)
-        #   #print('intersection:', intersection)
-        #   for d in difference:
-        #     if d in mrc_files:
-        #       print('Warning: No matching label file for %s.mrc' % (d))
-        #     elif d in label_files:
-        #       print('Warning: No matching data file for %s.%s' % (d, opt.label_type))
-          
-        #   mrc_files = [ m+'.mrc' for m in intersection ]
-        #   label_files = [ l+'.'+opt.label_type for l in intersection ]
-
-        #   reader = reader_factory[opt.label_type]
-
-        #   if opt.mode == 'fiber':
-        #     fiber_label_path = os.path.join(label_path, 'processed_labels')
-        #     if not os.path.exists(fiber_label_path):
-        #       os.makedirs(fiber_label_path)
-        #     for l in label_files:
-        #           if l.endswith('thi'):
-        #               with open(os.path.join(label_path,l)) as f:
-        #                   header=f.readlines()
-        #               if not header:
-        #                   continue
-        #               elif 'Group' not in header[0].split():
-        #                   os.system('cp %s %s'%(os.path.join(label_path,l),os.path.join(fiber_label_path,l)))
-        #               else:
-        #                   group = gen_box.read_thi(os.path.join(label_path,l))
-        #                   boxes = gen_box.place_boxes(group)
-        #                   gen_box.write_thi(boxes, os.path.join(fiber_label_path, l))
-        #     label_path = fiber_label_path
-
-        #   for l in label_files:
-        #     print('Loading %s ...' % (l))
-        #     label.append(reader(os.path.join(label_path, l)))
-          
-        #   for m in mrc_files:
-        #     print('Loading %s ...' % (m))
-        #     mrc_data.append(load_and_downsample(os.path.join(opt.data, m), opt.target_size))
-
-        # #label = read_label(label_path, opt.label_type)
-        # elif opt.data.endswith('.thi'):
-        #     label_path = opt.label if opt.label else opt.data
-        #     label_files = [ l.rstrip('.'+opt.label_type) for l in os.listdir(label_path) if l.endswith(opt.label_type) ]
-        #     mrc_names = [ m.split('/')[-1].rstrip('.mrc') for m in mrc_files ]
-        #     name2file = {}
-        #     for i in range(len(mrc_names)):
-        #       name2file[mrc_names[i]] = mrc_files[i]
-        #     intersection = list(set(mrc_names).intersection(set(label_files)))
-        #     union = list(set(mrc_names) | set(label_files))
-        #     difference = list(set(union).difference(intersection))
-             
-        #     for d in difference:
-        #       if d in mrc_names:
-        #         print('Warning: No matching label file for %s' % (name2file[d]))
-        #       elif d in label_files:
-        #         print('Warning: No matching data file for %s.%s' % (d, opt.label_type))
-          
-        #     mrc_files = [ name2file[m] for m in intersection ]
-        #     label_files = [ l+'.'+opt.label_type for l in intersection ]
-
-        #     reader = reader_factory[opt.label_type]
-        #     if opt.mode == 'fiber':
-        #       fiber_label_path = os.path.join(label_path, 'processed_labels')
-        #       if not os.path.exists(fiber_label_path):
-        #         os.makedirs(fiber_label_path)
-        #       for l in label_files:
-        #         if l.endswith('.thi'):
-        #           header = None
-        #           with open(l) as f:
-        #             header = f.readline()
-        #           if not header:
-        #             continue
-        #           elif len(header.split()) < 6:
-        #             os.system('cp %s %s' %(l, os.path.join(fiber_label_path, l)))
-        #           else:
-        #             group = gen_box.read_thi(os.path.join(label_path,l))
-        #             boxes = gen_box.place_boxes(group)
-        #             gen_box.write_thi(boxes, os.path.join(fiber_label_path, l))
-        #       label_path = fiber_label_path
-
-        #     for l in label_files:
-        #       print('Loading %s ...' % (l))
-        #       label.append(reader(os.path.join(label_path, l)))
-          
-        #     for m in mrc_files:
-        #       print('Loading %s ...' % (m))
-        #       mrc_data.append(load_and_downsample(os.path.join(opt.data, m), opt.target_size))
-        #     #label = read_label(label_path, opt.label_type)
-        #     #mrc_name = []
-        #     #for m in mrc_data:
-        #     #    mrc_name.append(m.name)
-        #     #intersection = []
-        #     #for l in label:
-        #     #    if l.name in mrc_name:
-        #     #        intersection.append(l)
-        #     #label = intersection
-
-        # label.sort(key=lambda l: l.name)
-        # mrc_data.sort(key=lambda l: l.name)
-        # #debug:
-        # #for k in range(len(mrc_data)):
-        # #    print(mrc_data[k].name, '\t', label[k].name)
-
-        # downsampled_label = label_downsample(
-        #     mrc_data, label, 
-        #     opt.label_type, 
-        #     opt.target_size*mrc_data[0].data.shape[0]/mrc_data[0].data.shape[1],
-        #     opt.target_size
-        # )
         image_path = os.path.join(opt.data_dir, opt.exp_id, 'images')
         if not os.path.exists(image_path):
             os.makedirs(image_path)
@@ -474,12 +323,6 @@ def process(opt):
             mrc.save_image(m.data, os.path.join(image_path, m.name), f='png', verbose=True)
             count += 1
         print(count ,'micrographs loaded') 
-        # num_train = int(opt.train_pct / 100.0 * len(mrc_data)) 
-        # num_val = int(opt.val_pct / 100.0 * len(mrc_data))
-        # num_test = int(opt.test_pct / 100.0 * len(mrc_data))
-        # train = downsampled_label[0:num_train]
-        # val = downsampled_label[num_train:num_train+num_val]
-        # test = downsampled_label[num_train+num_val:num_train+num_val+num_test]
         print("len(train)=", len(train), "len(val)=", len(val), "len(test)=", len(test))
         print('Creating COCO annotations')
         anno_path = os.path.join(opt.data_dir, opt.exp_id, 'annotations')
